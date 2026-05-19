@@ -10,10 +10,16 @@ const navLinks  = document.querySelector('.nav-links');
 
 hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('open');
+  hamburger.classList.toggle('active');
+  document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
 });
 
 navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => navLinks.classList.remove('open'));
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    hamburger.classList.remove('active');
+    document.body.style.overflow = '';
+  });
 });
 
 // ── SCROLL REVEAL ────────────────────────────────────────────────────
