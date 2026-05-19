@@ -55,31 +55,53 @@ window.addEventListener('scroll', () => {
   });
 });
 
-// ── CONTACT FORM ─────────────────────────────────────────────────────
+// ── CONTACT FORM (Formspree) ─────────────────────────────────────────
 const form     = document.getElementById('contact-form');
 const formNote = document.getElementById('form-note');
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const name    = document.getElementById('name').value.trim();
   const email   = document.getElementById('email').value.trim();
   const message = document.getElementById('message').value.trim();
 
+  // Basic validation
   if (!name || !email || !message) {
     formNote.textContent = '⚠️ Please fill in all fields.';
     formNote.style.color = '#ff6b6b';
     return;
   }
 
-  // Build mailto link as fallback (no backend needed for static site)
-  const subject = encodeURIComponent(`Portfolio Contact from ${name}`);
-  const body    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-  window.location.href = `mailto:kabir1922@gmail.com?subject=${subject}&body=${body}`;
+  // Show sending state
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  formNote.textContent = '';
 
-  formNote.textContent = '✅ Opening your email client...';
-  formNote.style.color = 'var(--hot)';
-  form.reset();
-  setTimeout(() => formNote.textContent = '', 5000);
+  try {
+    const response = await fetch('https://formspree.io/f/xkoegpqo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+
+    if (response.ok) {
+      formNote.textContent = '✅ Message sent! I will get back to you soon.';
+      formNote.style.color = '#00d4aa';
+      form.reset();
+    } else {
+      const data = await response.json();
+      throw new Error(data.error || 'Server error');
+    }
+  } catch (err) {
+    formNote.textContent = '❌ Failed to send. Please email me directly at kabir1922@gmail.com';
+    formNote.style.color = '#ff6b6b';
+  } finally {
+    btn.textContent = 'Send Message ✉️';
+    btn.disabled = false;
+    setTimeout(() => formNote.textContent = '', 6000);
+  }
 });
 
 // ── TYPED EFFECT ON HERO CODE CARD ───────────────────────────────────
